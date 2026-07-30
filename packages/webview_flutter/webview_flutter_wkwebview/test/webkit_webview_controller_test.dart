@@ -889,6 +889,60 @@ void main() {
       expect(userScript.injectionTime, UserScriptInjectionTime.atDocumentStart);
     });
 
+    test('addDocumentStartJavaScript', () async {
+      final mockUserContentController = MockWKUserContentController();
+      final WebKitWebViewController controller = createControllerWithMocks(
+        mockUserContentController: mockUserContentController,
+      );
+
+      await controller.addDocumentStartJavaScript('window.test = true;');
+
+      final userScript =
+          verify(mockUserContentController.addUserScript(captureAny)).captured.single
+              as WKUserScript;
+      expect(userScript.source, 'window.test = true;');
+      expect(userScript.injectionTime, UserScriptInjectionTime.atDocumentStart);
+      expect(userScript.isForMainFrameOnly, isFalse);
+    });
+
+    test('removeJavaScriptChannel preserves document start JavaScript', () async {
+      PigeonOverrides.wKScriptMessageHandler_new =
+          ({
+            required void Function(WKScriptMessageHandler, WKUserContentController, WKScriptMessage)
+            didReceiveScriptMessage,
+            dynamic observeValue,
+          }) {
+            return WKScriptMessageHandler.pigeon_detached(
+              didReceiveScriptMessage: didReceiveScriptMessage,
+            );
+          };
+
+      final javaScriptChannelParams = WebKitJavaScriptChannelParams(
+        name: 'name',
+        onMessageReceived: (JavaScriptMessage message) {},
+      );
+
+      final mockUserContentController = MockWKUserContentController();
+      final WebKitWebViewController controller = createControllerWithMocks(
+        mockUserContentController: mockUserContentController,
+      );
+
+      await controller.addDocumentStartJavaScript('window.test = true;');
+      await controller.addJavaScriptChannel(javaScriptChannelParams);
+      reset(mockUserContentController);
+
+      await controller.removeJavaScriptChannel('name');
+
+      verify(mockUserContentController.removeAllUserScripts());
+      verify(mockUserContentController.removeScriptMessageHandler('name'));
+      final userScript =
+          verify(mockUserContentController.addUserScript(captureAny)).captured.single
+              as WKUserScript;
+      expect(userScript.source, 'window.test = true;');
+      expect(userScript.injectionTime, UserScriptInjectionTime.atDocumentStart);
+      expect(userScript.isForMainFrameOnly, isFalse);
+    });
+
     test('addJavaScriptChannel requires channel with a unique name', () async {
       PigeonOverrides.wKScriptMessageHandler_new =
           ({

@@ -317,6 +317,8 @@ class WebKitWebViewController extends PlatformWebViewController {
   final Map<String, WebKitJavaScriptChannelParams> _javaScriptChannelParams =
       <String, WebKitJavaScriptChannelParams>{};
 
+  final List<String> _documentStartJavaScripts = <String>[];
+
   bool _zoomEnabled = true;
   WebKitNavigationDelegate? _currentNavigationDelegate;
 
@@ -445,6 +447,12 @@ class WebKitWebViewController extends PlatformWebViewController {
       contentController.addUserScript(wrapperScript),
       contentController.addScriptMessageHandler(webKitParams._messageHandler, webKitParams.name),
     ]);
+  }
+
+  @override
+  Future<void> addDocumentStartJavaScript(String javaScript) async {
+    _documentStartJavaScripts.add(javaScript);
+    return _addDocumentStartJavaScript(javaScript);
   }
 
   @override
@@ -807,6 +815,8 @@ class WebKitWebViewController extends PlatformWebViewController {
     _javaScriptChannelParams.clear();
 
     await Future.wait(<Future<void>>[
+      for (final String javaScript in _documentStartJavaScripts)
+        _addDocumentStartJavaScript(javaScript),
       for (final JavaScriptChannelParams params in remainingChannelParams.values)
         addJavaScriptChannel(params),
       // Zoom is disabled with a WKUserScript, so this adds it back if it was
@@ -816,6 +826,17 @@ class WebKitWebViewController extends PlatformWebViewController {
       // if a console callback was registered with [setOnConsoleMessage].
       if (_onConsoleMessageCallback != null) _injectConsoleOverride(),
     ]);
+  }
+
+  Future<void> _addDocumentStartJavaScript(String javaScript) async {
+    final userScript = WKUserScript(
+      source: javaScript,
+      injectionTime: UserScriptInjectionTime.atDocumentStart,
+      isForMainFrameOnly: false,
+    );
+    final WKUserContentController controller = await _webView.configuration
+        .getUserContentController();
+    await controller.addUserScript(userScript);
   }
 
   Future<void> _disableZoom() async {

@@ -17,8 +17,11 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.webkit.WebViewCompat;
+import androidx.webkit.WebViewFeature;
 import io.flutter.embedding.android.FlutterView;
 import io.flutter.plugin.platform.PlatformView;
+import java.util.Collections;
 import java.util.Map;
 import kotlin.Result;
 import kotlin.Unit;
@@ -224,6 +227,18 @@ public class WebViewProxyApi extends PigeonApiWebView {
       @NonNull Function1<? super Result<String>, Unit> callback) {
     pigeon_instance.evaluateJavascript(
         javascriptString, result -> ResultCompat.success(result, callback));
+  }
+
+  @Override
+  public void addDocumentStartJavaScript(
+      @NonNull WebView pigeon_instance, @NonNull String javaScript) {
+    if (!WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) {
+      throw new UnsupportedOperationException(
+          "Document-start JavaScript injection is not supported by the current WebView.");
+    }
+
+    WebViewCompat.addDocumentStartJavaScript(
+        pigeon_instance, javaScript, Collections.singleton("*"));
   }
 
   @Nullable

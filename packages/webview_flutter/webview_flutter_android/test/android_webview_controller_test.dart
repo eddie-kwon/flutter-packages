@@ -1403,6 +1403,17 @@ void main() {
       verify(mockWebView.evaluateJavascript('alert("This is a test.");')).called(1);
     });
 
+    test('addDocumentStartJavaScript', () async {
+      final mockWebView = MockWebView();
+      final AndroidWebViewController controller = createControllerWithMocks(
+        mockWebView: mockWebView,
+      );
+
+      await controller.addDocumentStartJavaScript('window.test = true;');
+
+      verify(mockWebView.addDocumentStartJavaScript('window.test = true;')).called(1);
+    });
+
     test('runJavaScriptReturningResult with return value', () async {
       final mockWebView = MockWebView();
       final AndroidWebViewController controller = createControllerWithMocks(

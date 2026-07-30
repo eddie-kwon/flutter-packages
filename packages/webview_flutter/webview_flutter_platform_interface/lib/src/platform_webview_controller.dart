@@ -168,6 +168,17 @@ abstract class PlatformWebViewController extends PlatformInterface {
     throw UnimplementedError('runJavaScript is not implemented on the current platform');
   }
 
+  /// Adds JavaScript that runs at the start of future document loads.
+  ///
+  /// This method should be called before loading a page if the script needs to
+  /// run for that page. It does not run JavaScript in the currently loaded
+  /// document.
+  Future<void> addDocumentStartJavaScript(String javaScript) {
+    throw UnimplementedError(
+      'addDocumentStartJavaScript is not implemented on the current platform',
+    );
+  }
+
   /// Runs the given JavaScript in the context of the current page, and returns the result.
   ///
   /// The Future completes with an error if a JavaScript error occurred, or if the

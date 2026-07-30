@@ -519,6 +519,11 @@ class AndroidWebViewController extends PlatformWebViewController {
   }
 
   @override
+  Future<void> addDocumentStartJavaScript(String javaScript) {
+    return _webView.addDocumentStartJavaScript(javaScript);
+  }
+
+  @override
   Future<Object> runJavaScriptReturningResult(String javaScript) async {
     final String? result = await _webView.evaluateJavascript(javaScript);
 

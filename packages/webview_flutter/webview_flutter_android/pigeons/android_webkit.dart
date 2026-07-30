@@ -347,6 +347,9 @@ abstract class WebView extends View {
   @async
   String? evaluateJavascript(String javascriptString);
 
+  /// Adds JavaScript that runs at the start of future document loads.
+  void addDocumentStartJavaScript(String javaScript);
+
   /// Gets the title for the current page.
   String? getTitle();
 

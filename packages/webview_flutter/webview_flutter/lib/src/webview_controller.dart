@@ -236,6 +236,18 @@ class WebViewController {
     return platform.runJavaScript(javaScript);
   }
 
+  /// Adds JavaScript that runs at the start of future document loads.
+  ///
+  /// This method should be called before loading a page if the script needs to
+  /// run for that page. It does not run JavaScript in the currently loaded
+  /// document.
+  ///
+  /// Throws if the current platform does not support document-start JavaScript
+  /// injection.
+  Future<void> addDocumentStartJavaScript(String javaScript) {
+    return platform.addDocumentStartJavaScript(javaScript);
+  }
+
   /// Runs the given JavaScript in the context of the current page, and returns
   /// the result.
   ///

@@ -155,10 +155,6 @@ class AndroidWebkitLibraryPigeonInstanceManager(
    */
   fun <T> remove(identifier: Long): T? {
     logWarningIfFinalizationListenerHasStopped()
-    val instance: Any? = getInstance(identifier)
-    if (instance is WebViewProxyApi.WebViewPlatformView) {
-      instance.destroy()
-    }
     return strongInstances.remove(identifier) as T?
   }
 
@@ -1815,6 +1811,12 @@ abstract class PigeonApiWebView(
       callback: (Result<String?>) -> Unit
   )
 
+  /** Adds JavaScript that runs at the start of future document loads. */
+  abstract fun addDocumentStartJavaScript(
+      pigeon_instance: android.webkit.WebView,
+      javaScript: String
+  )
+
   /** Gets the title for the current page. */
   abstract fun getTitle(pigeon_instance: android.webkit.WebView): String?
 
@@ -2197,6 +2199,30 @@ abstract class PigeonApiWebView(
                 reply.reply(AndroidWebkitLibraryPigeonUtils.wrapResult(data))
               }
             }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel =
+            BasicMessageChannel<Any?>(
+                binaryMessenger,
+                "dev.flutter.pigeon.webview_flutter_android.WebView.addDocumentStartJavaScript",
+                codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val pigeon_instanceArg = args[0] as android.webkit.WebView
+            val javaScriptArg = args[1] as String
+            val wrapped: List<Any?> =
+                try {
+                  api.addDocumentStartJavaScript(pigeon_instanceArg, javaScriptArg)
+                  listOf(null)
+                } catch (exception: Throwable) {
+                  AndroidWebkitLibraryPigeonUtils.wrapError(exception)
+                }
+            reply.reply(wrapped)
           }
         } else {
           channel.setMessageHandler(null)

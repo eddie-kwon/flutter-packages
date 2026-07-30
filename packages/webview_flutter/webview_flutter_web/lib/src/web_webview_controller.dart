@@ -83,6 +83,11 @@ class WebWebViewController extends PlatformWebViewController {
     }
   }
 
+  @override
+  Future<void> addDocumentStartJavaScript(String javaScript) async {
+    throw UnsupportedError('Document-start JavaScript injection is not supported on web.');
+  }
+
   /// Performs an AJAX request defined by [params].
   Future<void> _updateIFrameFromXhr(LoadRequestParams params) async {
     final response =

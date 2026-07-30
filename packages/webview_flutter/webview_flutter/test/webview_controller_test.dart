@@ -146,6 +146,15 @@ void main() {
     verify(mockPlatformWebViewController.runJavaScript('1 + 1'));
   });
 
+  test('addDocumentStartJavaScript', () async {
+    final mockPlatformWebViewController = MockPlatformWebViewController();
+
+    final webViewController = WebViewController.fromPlatform(mockPlatformWebViewController);
+
+    await webViewController.addDocumentStartJavaScript('window.test = true;');
+    verify(mockPlatformWebViewController.addDocumentStartJavaScript('window.test = true;'));
+  });
+
   test('runJavaScriptReturningResult', () async {
     final mockPlatformWebViewController = MockPlatformWebViewController();
     when(
